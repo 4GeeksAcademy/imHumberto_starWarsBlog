@@ -1,37 +1,70 @@
-// Import necessary hooks and components from react-router-dom and other libraries.
-import { Link, useParams } from "react-router-dom";  // To use link for navigation and useParams to get URL parameters
-import PropTypes from "prop-types";  // To define prop types for this component
-import rigoImageUrl from "../assets/img/rigo-baby.jpg"  // Import an image asset
-import useGlobalReducer from "../hooks/useGlobalReducer";  // Import a custom hook for accessing the global state
+import { useState, useEffect } from "react"
+import { Link, useParams } from "react-router-dom"
+import useGlobalReducer from "../hooks/useGlobalReducer"
 
-// Define and export the Single component which displays individual item details.
-export const Single = props => {
-  // Access the global state using the custom hook.
+export const Single = () => {
   const { store } = useGlobalReducer()
+  const { type, theId } = useParams()
+  const [details, setDetails] = useState(null)
 
-  // Retrieve the 'theId' URL parameter using useParams hook.
-  const { theId } = useParams()
-  const singleTodo = store.todos.find(todo => todo.id === parseInt(theId));
+  const fields = {
+    people: [
+      { label: "Gender", key: "gender" },
+      { label: "Birth Year", key: "birth_year" },
+      { label: "Height", key: "height" },
+      { label: "Mass", key: "mass" },
+      { label: "Eye Color", key: "eye_color" },
+      { label: "Hair Color", key: "hair_color" },
+    ],
+    planets: [
+      { label: "Climate", key: "climate" },
+      { label: "Terrain", key: "terrain" },
+      { label: "Population", key: "population" },
+      { label: "Gravity", key: "gravity" },
+      { label: "Diameter", key: "diameter" },
+      { label: "Orbital Period", key: "orbital_period" },
+    ],
+    starships: [
+      { label: "Model", key: "model" },
+      { label: "Manufacturer", key: "manufacturer" },
+      { label: "Crew", key: "crew" },
+      { label: "Passengers", key: "passengers" },
+      { label: "Max Speed", key: "max_atmosphering_speed" },
+      { label: "Cost", key: "cost_in_credits" },
+    ]
+  }
+
+  useEffect(() => {
+    fetch(`https://www.swapi.tech/api/${type}/${theId}`)
+      .then(res => res.json())
+      .then(data => setDetails(data.result))
+  }, [type, theId])
+
+  const p = details?.properties
 
   return (
-    <div className="container text-center">
-      {/* Display the title of the todo element dynamically retrieved from the store using theId. */}
-      <h1 className="display-4">Todo: {singleTodo?.title}</h1>
-      <hr className="my-4" />  {/* A horizontal rule for visual separation. */}
-
-      {/* A Link component acts as an anchor tag but is used for client-side routing to prevent page reloads. */}
-      <Link to="/">
-        <span className="btn btn-primary btn-lg" href="#" role="button">
-          Back home
-        </span>
-      </Link>
+    <div className="container py-5">
+      <div className="row">
+        <div className="col-md-6">
+          <svg width="100%" height="600" xmlns="http://www.w3.org/2000/svg">
+            <rect width="100%" height="100%" fill="#55595c"/>
+            <text x="50%" y="50%" fill="#eceeef" dy=".3em" textAnchor="middle">No image available</text>
+          </svg>
+        </div>
+        
+        <div className="col-md-6">
+          <h1 className="display-4 fw-bold">{p?.name}</h1>
+          <p className="text-muted mb-4">{details?.description}</p>
+          <hr />
+          {fields[type].map((field, index) => (
+            <div className="col-6 mb-3" key={index}>
+              <strong>{field.label}</strong>
+              <p>{p?.[field.key]}</p>
+            </div>
+          ))}
+          <Link to="/" className="btn btn-primary mt-3">Back home</Link>
+        </div>
+      </div>
     </div>
-  );
-};
-
-// Use PropTypes to validate the props passed to this component, ensuring reliable behavior.
-Single.propTypes = {
-  // Although 'match' prop is defined here, it is not used in the component.
-  // Consider removing or using it as needed.
-  match: PropTypes.object
-};
+  )
+}
