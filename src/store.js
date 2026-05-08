@@ -3,6 +3,7 @@ export const initialStore=()=>{
     people: [],
     planets: [],
     starships: [],
+    favorites: []
   }
 }
 
@@ -14,6 +15,10 @@ export default function storeReducer(store, action = {}) {
       return { ...store, planets: action.payload}
     case 'set_starships':
       return { ...store, starships: action.payload}
+    case 'add_favorite':
+      return {...store, favorites: [...store.favorites, action.payload]}
+    case 'remove_favorite':
+      return {...store, favorites: store.favorites.filter( fav => fav.uid !== action.payload.uid )}
     default:
       throw Error ('Accion desconocida')
   }
